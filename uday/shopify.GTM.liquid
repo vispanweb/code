@@ -1,0 +1,131 @@
+	{% render 'ajax-cart-template' %}
+
+	<script>
+		//cart functions
+		theme.ajaxCartInit = function() {
+			ajaxCart.init({
+				{% unless template.name == 'cart' %}
+				{% if settings.cart_type == 'modal' %}
+				sourceId: '#CartTemplate',
+				triggerSelector: '.js-cart-trigger',
+				formSelector: '.js-product-form',
+				addToCartSelector: '.js-product-add',
+				{% endif %}
+				{% if settings.cart_type == 'notification' %}
+				sourceId: '#NotificationTemplate',
+				triggerSelector: '.js-cart-icon',
+				formSelector: '.js-product-form',
+				addToCartSelector: '.js-product-add',
+				{% endif %}
+				{% endunless %}
+				cartContainer: '#CartContainer',
+				cartCountSelector: '#CartCount',
+				cartCostSelector: '#CartCost',
+				emptySelector: '#EmptyCart',
+				moneyFormat: {{ shop.money_format | json }}
+			});
+		};
+	</script>
+	<!-- Venue theme by Safe As Milk - http://safeasmilk.co/ -->
+	<!-- Theme version 5.0.3 -->
+{% render 'preorder-now' %}
+   {% include 'smile-initializer' %}
+
+  <!-- PickyStory snippet "main_widget_script", do not modify. Safe to remove after the app is uninstalled -->
+  {% if content_for_header contains 'pickystory' %}
+    <script defer src="https://cdn.pickystory.com/widget/dist/latest/pickystory-widget.min.js"></script>
+  {% endif %}
+  <!-- PickyStory end snippet "main_widget_script" -->
+  <script>
+  window.dataLayer = window.dataLayer || [];
+
+  // Track product view
+  if (typeof product !== 'undefined') {
+    dataLayer.push({
+      'event': 'productView',
+      'ecommerce': {
+        'detail': {
+          'products': [{
+            'name': product.name,
+            'id': product.id,
+            'price': product.price,
+            'category': product.category,
+            'variant': product.variant
+          }]
+        }
+      }
+    });
+  }
+
+  // Track add to cart
+  document.addEventListener('click', function(event) {
+    if (event.target && event.target.classList.contains('add-to-cart-btn')) {
+      dataLayer.push({
+        'event': 'addToCart',
+        'ecommerce': {
+          'currencyCode': 'USD',
+          'add': {
+            'products': [{
+              'name': event.target.getAttribute('data-product-name'),
+              'id': event.target.getAttribute('data-product-id'),
+              'price': event.target.getAttribute('data-product-price'),
+              'category': event.target.getAttribute('data-product-category'),
+              'variant': event.target.getAttribute('data-product-variant'),
+              'quantity': 1
+            }]
+          }
+        }
+      });
+    }
+  });
+
+  // Track checkout
+  if (typeof checkout !== 'undefined') {
+    dataLayer.push({
+      'event': 'checkout',
+      'ecommerce': {
+        'checkout': {
+          'products': checkout.line_items.map(function(item) {
+            return {
+              'name': item.title,
+              'id': item.product_id,
+              'price': item.price,
+              'category': item.product_type,
+              'variant': item.variant_title,
+              'quantity': item.quantity
+            }
+          })
+        }
+      }
+    });
+  }
+
+  // Track purchase
+  if (typeof purchase !== 'undefined') {
+    dataLayer.push({
+      'event': 'purchase',
+      'ecommerce': {
+        'purchase': {
+          'actionField': {
+            'id': purchase.order_id,
+            'affiliation': 'Doctor Seaweed',
+            'revenue': purchase.total_price,
+            'tax': purchase.total_tax,
+            'shipping': purchase.total_shipping,
+            'coupon': purchase.discount_codes.length > 0 ? purchase.discount_codes[0].code : ''
+          },
+          'products': purchase.line_items.map(function(item) {
+            return {
+              'name': item.title,
+              'id': item.product_id,
+              'price': item.price,
+              'category': item.product_type,
+              'variant': item.variant_title,
+              'quantity': item.quantity
+            }
+          })
+        }
+      }
+    });
+  }
+</script>
